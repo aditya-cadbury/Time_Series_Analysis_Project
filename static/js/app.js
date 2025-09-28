@@ -65,9 +65,23 @@ const elements = {
     // Loading
     loadingOverlay: document.getElementById('loadingOverlay'),
     
-    // FAB
-    scrollToTop: document.getElementById('scrollToTop')
+    // FAB - Create if doesn't exist
+    scrollToTop: document.getElementById('scrollToTop') || createScrollToTopButton(),
+    
+    // Main content
+    mainContent: document.getElementById('mainContent')
 };
+
+// ===== UTILITY FUNCTIONS =====
+function createScrollToTopButton() {
+    const button = document.createElement('button');
+    button.id = 'scrollToTop';
+    button.className = 'btn btn-primary position-fixed';
+    button.style.cssText = 'bottom: 20px; right: 20px; z-index: 1000; border-radius: 50%; width: 50px; height: 50px; display: none;';
+    button.innerHTML = '<i class="bi bi-arrow-up"></i>';
+    document.body.appendChild(button);
+    return button;
+}
 
 // ===== INITIALIZATION =====
 document.addEventListener('DOMContentLoaded', function() {
@@ -181,7 +195,7 @@ async function loadStockData() {
     try {
         console.log('Loading stock data for:', ticker, period);
         
-        // Simulate API call - replace with actual backend call
+        // API call to Flask backend
         const response = await fetch('/api/load_stock_data', {
             method: 'POST',
             headers: {
@@ -206,7 +220,8 @@ async function loadStockData() {
     } catch (error) {
         console.error('Error loading stock data:', error);
         showNotification('Error loading stock data. Using sample data.', 'error');
-        loadSampleData();
+        // Load sample data as fallback
+        await loadSampleData();
     } finally {
         showLoading(false);
     }
@@ -218,7 +233,7 @@ async function loadSampleData() {
     try {
         console.log('Loading sample data...');
         
-        // Simulate API call - replace with actual backend call
+        // API call to Flask backend
         const response = await fetch('/api/load_sample_data');
         
         console.log('Sample data response status:', response.status);
@@ -386,7 +401,8 @@ async function runForecasting() {
             data: currentData,
             forecast_periods: parseInt(elements.forecastPeriods.value),
             confidence_interval: parseInt(elements.confidenceInterval.value),
-            auto_params: elements.autoParams.checked
+            auto_params: elements.autoParams.checked,
+            fast_mode: true
         };
         
         // Add manual parameters if not auto
@@ -409,14 +425,18 @@ async function runForecasting() {
         
         console.log('Sending forecasting request:', params);
         
-        // Simulate API call - replace with actual backend call
+        // API call to Flask backend with timeout (30s)
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000);
         const response = await fetch('/api/forecast', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(params)
+            body: JSON.stringify(params),
+            signal: controller.signal
         });
+        clearTimeout(timeoutId);
         
         console.log('Forecasting response status:', response.status);
         

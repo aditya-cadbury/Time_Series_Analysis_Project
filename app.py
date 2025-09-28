@@ -12,7 +12,7 @@ import warnings
 
 from models.arima_model import ARIMAForecaster
 from models.sarima_model import SARIMAForecaster
-from models.prophet_model import ProphetForecaster
+# from models.prophet_model import ProphetForecaster  # Commented out due to PyArrow issues
 from utils.data_loader import DataLoader
 from utils.visualizations import create_forecast_plots, create_model_comparison
 
@@ -148,7 +148,7 @@ def main():
     
     model_choice = st.selectbox(
         "Select Forecasting Model",
-        ["ARIMA", "SARIMA", "Prophet", "Compare All Models"]
+        ["ARIMA", "SARIMA", "Compare All Models"]
     )
     
     # Forecasting parameters
@@ -235,27 +235,7 @@ def main():
                     with col4:
                         st.metric("MAPE", f"{sarima_results['mape']:.2f}%")
             
-            elif model_choice == "Prophet":
-                # Prophet Model
-                st.markdown('<h2 class="section-header">🔮 Prophet Forecast</h2>', unsafe_allow_html=True)
-                
-                prophet_model = ProphetForecaster()
-                prophet_results = prophet_model.fit_forecast(df, forecast_periods, confidence_interval)
-                
-                if prophet_results:
-                    create_forecast_plots(df, prophet_results, "Prophet", forecast_periods)
-                    
-                    # Model metrics
-                    col1, col2, col3, col4 = st.columns(4)
-                    with col1:
-                        st.metric("MAE", f"{prophet_results['mae']:.2f}")
-                    with col2:
-                        st.metric("RMSE", f"{prophet_results['rmse']:.2f}")
-                    with col3:
-                        st.metric("MAPE", f"{prophet_results['mape']:.2f}%")
-                    with col4:
-                        st.metric("R²", f"{prophet_results['r2']:.3f}")
-            
+            # Prophet model removed due to PyArrow dependency issues
             elif model_choice == "Compare All Models":
                 # Compare all models
                 st.markdown('<h2 class="section-header">🏆 Model Comparison</h2>', unsafe_allow_html=True)
@@ -274,11 +254,7 @@ def main():
                 if sarima_results:
                     models_results['SARIMA'] = sarima_results
                 
-                # Prophet
-                prophet_model = ProphetForecaster()
-                prophet_results = prophet_model.fit_forecast(df, forecast_periods, confidence_interval)
-                if prophet_results:
-                    models_results['Prophet'] = prophet_results
+                # Prophet removed due to PyArrow dependency issues
                 
                 if models_results:
                     create_model_comparison(df, models_results, forecast_periods)
