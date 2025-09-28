@@ -1,0 +1,163 @@
+# 🚀 Time Series Forecasting Project - Manual Setup Guide
+
+## 📋 Prerequisites
+- Python 3.8 or higher installed
+- Terminal/Command Prompt access
+- Internet connection (for dependencies and stock data)
+
+---
+
+## 🔧 Step-by-Step Setup Instructions
+
+### Step 1: Navigate to Project Directory
+```bash
+cd /Users/rehaankhatri/ATSA_project_sem_7/Time_Series_Analysis_Project
+```
+
+### Step 2: Activate Virtual Environment (Optional but Recommended)
+```bash
+# Create virtual environment if it doesn't exist
+python3 -m venv venv
+
+# Activate virtual environment
+# On macOS/Linux:
+source venv/bin/activate
+# On Windows:
+# venv\Scripts\activate
+```
+
+### Step 3: Install Dependencies
+```bash
+pip install flask flask-cors pandas numpy matplotlib seaborn plotly scikit-learn statsmodels yfinance requests python-dotenv
+```
+
+### Step 4: Run the Flask Application
+```bash
+python app_flask.py
+```
+
+### Step 5: Access the Application
+Open your web browser and go to:
+- **Local:** `http://127.0.0.1:5001` or `http://localhost:5001`
+- **Network:** `http://192.168.29.98:5001` (accessible from other devices)
+
+---
+
+## 🎯 Quick Start Guide
+
+### 1. Load Data
+- Click **"Load Sample Data"** for quick testing
+- Or enter a stock ticker (like AAPL) and click **"Load Data"**
+
+### 2. Run Forecasting
+- Select model: **ARIMA** or **SARIMA**
+- Adjust forecast periods (default: 30)
+- Set confidence interval (default: 95%)
+- Click **"Run Forecasting"**
+
+### 3. View Results
+- Performance metrics (RMSE, MAE, MAPE, AIC)
+- Interactive forecast charts
+- Residuals analysis
+
+---
+
+## 🔧 Troubleshooting
+
+### If you get dependency errors:
+```bash
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+### If port 5001 is busy:
+```bash
+# Kill any process using port 5001
+lsof -ti:5001 | xargs kill -9
+# Then run the app again
+python app_flask.py
+```
+
+### If you get PyArrow/Prophet errors:
+Don't worry! The project now works without Prophet. Just use ARIMA and SARIMA models.
+
+### If Flask doesn't start:
+```bash
+# Check if all files are present
+ls -la app_flask.py models/ utils/ static/ templates/
+
+# Make sure you're in the right directory
+pwd
+```
+
+---
+
+## 📱 Alternative: Run Streamlit Version (If Available)
+```bash
+# If you want to try Streamlit (may have dependency issues)
+pip install streamlit
+streamlit run app.py
+```
+
+---
+
+## 🛑 To Stop the Application
+- Press `Ctrl + C` in the terminal
+- Or close the terminal window
+
+---
+
+## 📋 Complete Command Sequence (Copy & Paste)
+```bash
+# Navigate to project
+cd /Users/rehaankhatri/ATSA_project_sem_7/Time_Series_Analysis_Project
+
+# Activate virtual environment (optional)
+source venv/bin/activate
+
+# Install dependencies
+pip install flask flask-cors pandas numpy matplotlib seaborn plotly scikit-learn statsmodels yfinance requests python-dotenv
+
+# Run the application
+python app_flask.py
+
+# Open browser to http://localhost:5001
+```
+
+---
+
+## ✅ Success Indicators
+- Terminal shows: `* Running on http://127.0.0.1:5001`
+- Browser loads the dashboard successfully
+- You can load sample data and run forecasts
+- Charts display properly
+
+---
+
+## 🎉 Features Available
+- **Data Sources:** Stock data (Yahoo Finance), CSV upload, Sample data
+- **Models:** ARIMA, SARIMA (Prophet disabled due to dependency issues)
+- **Visualizations:** Interactive charts with Plotly
+- **Performance Metrics:** RMSE, MAE, MAPE, AIC, BIC
+- **Fast Mode:** Enabled by default for better performance
+- **Error Handling:** Comprehensive validation and fallbacks
+
+---
+
+## 📞 Support
+If you encounter any issues:
+1. Check the terminal output for error messages
+2. Ensure all dependencies are installed
+3. Verify you're in the correct directory
+4. Try the troubleshooting steps above
+
+---
+
+## 🔗 Repository Information
+- **GitHub:** https://github.com/aditya-cadbury/Time_Series_Analysis_Project.git
+- **Last Updated:** September 2025
+- **Project Type:** ATSA Major Project for Forecasting
+
+---
+
+**Your Time Series Forecasting Dashboard should now be running perfectly!** 🎉
