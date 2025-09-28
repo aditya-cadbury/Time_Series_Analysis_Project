@@ -2,9 +2,9 @@
 
 A comprehensive web application for time series analysis and forecasting using multiple advanced models including ARIMA, SARIMA, and Prophet. Built with Streamlit for an intuitive and visually appealing user interface.
 
-## 🚀 Features
+## Features
 
-### 📊 Data Sources
+### Data Sources
 - **Stock Data**: Real-time data from Yahoo Finance (AAPL, GOOGL, MSFT, etc.)
 - **CSV Upload**: Upload your own time series data
 - **Sample Data**: Built-in sample datasets for testing
@@ -14,7 +14,7 @@ A comprehensive web application for time series analysis and forecasting using m
 - **SARIMA (Seasonal ARIMA)**: Enhanced ARIMA with seasonal components
 - **Prophet**: Facebook's robust forecasting tool with trend and seasonality detection
 
-### 📈 Visualizations
+### Visualizations
 - Interactive time series plots with Plotly
 - Model comparison charts
 - Residual analysis plots
@@ -22,7 +22,7 @@ A comprehensive web application for time series analysis and forecasting using m
 - Performance metrics visualization
 - Confidence intervals and prediction bands
 
-### 📊 Model Evaluation
+### Model Evaluation
 - RMSE (Root Mean Square Error)
 - MAE (Mean Absolute Error)
 - MAPE (Mean Absolute Percentage Error)
@@ -30,7 +30,7 @@ A comprehensive web application for time series analysis and forecasting using m
 - R-squared (Prophet)
 - Cross-validation metrics
 
-## 🛠️ Installation
+## Installation
 
 ### Prerequisites
 - Python 3.8 or higher
@@ -75,7 +75,7 @@ Project_ATSA/
     └── visualizations.py          # Plotting and visualization functions
 ```
 
-## 🎯 How to Use
+## How to Use
 
 ### 1. Load Data
 - **Stock Data**: Enter a ticker symbol (e.g., AAPL, GOOGL) and select time period
@@ -124,7 +124,7 @@ Supported tickers include:
 - **Energy**: XOM, CVX, COP
 - And many more...
 
-## 🔧 Model Parameters
+## Model Parameters
 
 ### ARIMA Parameters
 - **p**: Autoregressive order (0-5)
@@ -142,7 +142,7 @@ Supported tickers include:
 - **Daily Seasonality**: Disabled by default
 - **Seasonality Mode**: Additive or Multiplicative
 
-## 📈 Performance Tips
+## Performance Tips
 
 1. **Data Quality**: Ensure your data has minimal missing values
 2. **Data Length**: More historical data generally improves forecast accuracy
@@ -150,7 +150,7 @@ Supported tickers include:
 4. **Model Comparison**: Always compare multiple models for robust forecasts
 5. **Residual Analysis**: Check residuals for model adequacy
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
@@ -173,7 +173,7 @@ Supported tickers include:
    - Use smaller parameter search ranges
    - Close other applications to free memory
 
-## 📚 Model Descriptions
+## Model Descriptions
 
 ### ARIMA
 - **Best for**: Non-seasonal time series with trends
@@ -189,36 +189,5 @@ Supported tickers include:
 - **Best for**: Business time series with holidays and seasonality
 - **Strengths**: Robust to missing data, handles holidays, easy to use
 - **Limitations**: Less interpretable, requires more computational resources
-
-## 🤝 Contributing
-
-Feel free to contribute to this project by:
-- Adding new forecasting models
-- Improving visualizations
-- Enhancing data loading capabilities
-- Adding new evaluation metrics
-- Improving documentation
-
-## 📄 License
-
-This project is open source and available under the MIT License.
-
-## 🙏 Acknowledgments
-
-- **Streamlit** for the amazing web framework
-- **Plotly** for interactive visualizations
-- **Statsmodels** for ARIMA/SARIMA implementations
-- **Prophet** by Facebook for the forecasting library
-- **Yahoo Finance** for providing stock data
-
-## 📞 Support
-
-If you encounter any issues or have questions:
-1. Check the troubleshooting section above
-2. Review the model documentation
-3. Ensure your data meets the required format
-4. Try with sample data first to verify installation
-
----
-
+  
 **Happy Forecasting! 📈✨**
