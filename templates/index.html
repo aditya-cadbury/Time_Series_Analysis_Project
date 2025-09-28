@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Series Forecasting Dashboard</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📈</text></svg>">
+</head>
+<body>
+    <!-- Navigation Sidebar -->
+    <nav id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-container">
+                <i class="bi bi-graph-up-arrow logo-icon"></i>
+                <span class="logo-text">ForecastAI</span>
+            </div>
+            <button id="sidebarToggle" class="btn btn-link sidebar-toggle">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+        </div>
+        
+        <div class="sidebar-content">
+            <!-- Data Source Selection -->
+            <div class="sidebar-section">
+                <h6 class="section-title">
+                    <i class="bi bi-database"></i>
+                    Data Source
+                </h6>
+                <div class="form-group">
+                    <select id="dataSource" class="form-select custom-select">
+                        <option value="stock">Stock Data (Yahoo Finance)</option>
+                        <option value="csv">Upload CSV</option>
+                        <option value="sample">Sample Data</option>
+                    </select>
+                </div>
+                
+                <!-- Stock Data Configuration -->
+                <div id="stockConfig" class="config-section">
+                    <input type="text" id="tickerInput" class="form-control mb-2" placeholder="Enter Ticker (e.g., AAPL)" value="AAPL">
+                    <select id="timePeriod" class="form-select custom-select">
+                        <option value="1y">1 Year</option>
+                        <option value="2y">2 Years</option>
+                        <option value="5y">5 Years</option>
+                        <option value="10y">10 Years</option>
+                        <option value="max">Max</option>
+                    </select>
+                    <button id="loadStockData" class="btn btn-primary btn-3d mt-2">
+                        <i class="bi bi-download"></i> Load Data
+                    </button>
+                </div>
+                
+                <!-- CSV Upload -->
+                <div id="csvConfig" class="config-section d-none">
+                    <input type="file" id="csvFile" class="form-control" accept=".csv">
+                    <small class="text-muted">Upload CSV with date and value columns</small>
+                </div>
+                
+                <!-- Sample Data -->
+                <div id="sampleConfig" class="config-section d-none">
+                    <button id="loadSampleData" class="btn btn-primary btn-3d">
+                        <i class="bi bi-play-circle"></i> Load Sample Data
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Model Configuration -->
+            <div class="sidebar-section">
+                <h6 class="section-title">
+                    <i class="bi bi-cpu"></i>
+                    Model Selection
+                </h6>
+                <div class="form-group">
+                    <select id="modelSelection" class="form-select custom-select">
+                        <option value="arima">ARIMA</option>
+                        <option value="sarima">SARIMA</option>
+                        <option value="prophet">Prophet</option>
+                        <option value="compare">Compare All Models</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Forecasting Parameters -->
+            <div class="sidebar-section">
+                <h6 class="section-title">
+                    <i class="bi bi-sliders"></i>
+                    Parameters
+                </h6>
+                
+                <div class="parameter-group">
+                    <label for="forecastPeriods" class="form-label">Forecast Periods</label>
+                    <input type="range" id="forecastPeriods" class="form-range custom-range" min="10" max="100" value="30">
+                    <div class="range-value">
+                        <span id="forecastValue">30</span> periods
+                    </div>
+                </div>
+                
+                <div class="parameter-group">
+                    <label for="confidenceInterval" class="form-label">Confidence Interval</label>
+                    <input type="range" id="confidenceInterval" class="form-range custom-range" min="80" max="99" value="95">
+                    <div class="range-value">
+                        <span id="confidenceValue">95</span>%
+                    </div>
+                </div>
+                
+                <!-- ARIMA/SARIMA Parameters -->
+                <div id="arimaParams" class="params-section">
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="autoParams" checked>
+                        <label class="form-check-label" for="autoParams">
+                            Auto Parameter Selection
+                        </label>
+                    </div>
+                    
+                    <div id="manualParams" class="d-none">
+                        <div class="row g-2">
+                            <div class="col-4">
+                                <label class="form-label small">p (AR)</label>
+                                <input type="number" id="paramP" class="form-control form-control-sm" min="0" max="5" value="1">
+                            </div>
+                            <div class="col-4">
+                                <label class="form-label small">d (I)</label>
+                                <input type="number" id="paramD" class="form-control form-control-sm" min="0" max="3" value="1">
+                            </div>
+                            <div class="col-4">
+                                <label class="form-label small">q (MA)</label>
+                                <input type="number" id="paramQ" class="form-control form-control-sm" min="0" max="5" value="1">
+                            </div>
+                        </div>
+                        
+                        <!-- SARIMA Seasonal Parameters -->
+                        <div id="sarimaParams" class="mt-2 d-none">
+                            <small class="text-muted">Seasonal Parameters</small>
+                            <div class="row g-2">
+                                <div class="col-4">
+                                    <label class="form-label small">P</label>
+                                    <input type="number" id="paramP_seasonal" class="form-control form-control-sm" min="0" max="3" value="1">
+                                </div>
+                                <div class="col-4">
+                                    <label class="form-label small">D</label>
+                                    <input type="number" id="paramD_seasonal" class="form-control form-control-sm" min="0" max="2" value="1">
+                                </div>
+                                <div class="col-4">
+                                    <label class="form-label small">Q</label>
+                                    <input type="number" id="paramQ_seasonal" class="form-control form-control-sm" min="0" max="3" value="1">
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <label class="form-label small">Seasonal Period</label>
+                                <input type="number" id="seasonalPeriod" class="form-control form-control-sm" min="2" max="52" value="12">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Action Button -->
+            <div class="sidebar-section">
+                <button id="runForecasting" class="btn btn-success btn-3d btn-lg w-100">
+                    <i class="bi bi-rocket-takeoff"></i>
+                    Run Forecasting
+                </button>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <main id="mainContent" class="main-content">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="header-left">
+                    <button id="sidebarToggleMain" class="btn btn-link sidebar-toggle-main">
+                        <i class="bi bi-list"></i>
+                    </button>
+                    <h1 class="header-title">
+                        <i class="bi bi-graph-up-arrow"></i>
+                        Time Series Forecasting Dashboard
+                    </h1>
+                </div>
+                <div class="header-right">
+                    <div class="theme-toggle">
+                        <button id="themeToggle" class="btn btn-outline-secondary">
+                            <i class="bi bi-sun" id="themeIcon"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Content Area -->
+        <div class="content-wrapper">
+            <!-- Loading Overlay -->
+            <div id="loadingOverlay" class="loading-overlay d-none">
+                <div class="loading-spinner">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3">Training models and generating forecasts...</p>
+                </div>
+            </div>
+            
+            <!-- Data Overview Section -->
+            <section id="dataOverview" class="content-section d-none">
+                <div class="section-header">
+                    <h2><i class="bi bi-bar-chart"></i> Data Overview</h2>
+                </div>
+                
+                <!-- Metrics Cards -->
+                <div class="row g-4 mb-4">
+                    <div class="col-lg-3 col-md-6">
+                        <div class="metric-card">
+                            <div class="metric-icon">
+                                <i class="bi bi-graph-up"></i>
+                            </div>
+                            <div class="metric-content">
+                                <h3 id="dataPoints" class="metric-value">0</h3>
+                                <p class="metric-label">Data Points</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="metric-card">
+                            <div class="metric-icon">
+                                <i class="bi bi-calendar-range"></i>
+                            </div>
+                            <div class="metric-content">
+                                <h3 id="dateRange" class="metric-value">-</h3>
+                                <p class="metric-label">Date Range</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="metric-card">
+                            <div class="metric-icon">
+                                <i class="bi bi-calculator"></i>
+                            </div>
+                            <div class="metric-content">
+                                <h3 id="meanValue" class="metric-value">0.00</h3>
+                                <p class="metric-label">Mean Value</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="metric-card">
+                            <div class="metric-icon">
+                                <i class="bi bi-speedometer2"></i>
+                            </div>
+                            <div class="metric-content">
+                                <h3 id="stdValue" class="metric-value">0.00</h3>
+                                <p class="metric-label">Std Deviation</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Data Preview -->
+                <div class="card glass-card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-table"></i> Raw Data Preview</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table id="dataTable" class="table table-dark table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Data will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Time Series Visualization -->
+                <div class="card glass-card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-graph-up"></i> Time Series Visualization</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="timeSeriesChart" class="chart-container"></div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Forecasting Results Section -->
+            <section id="forecastingResults" class="content-section d-none">
+                <div class="section-header">
+                    <h2 id="resultsTitle"><i class="bi bi-crystal"></i> Forecasting Results</h2>
+                </div>
+                
+                <!-- Model Performance Metrics -->
+                <div id="modelMetrics" class="row g-4 mb-4">
+                    <!-- Metrics will be populated here -->
+                </div>
+                
+                <!-- Forecast Chart -->
+                <div class="card glass-card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-graph-up-arrow"></i> Forecast Visualization</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="forecastChart" class="chart-container"></div>
+                    </div>
+                </div>
+                
+                <!-- Residuals Analysis -->
+                <div class="card glass-card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-bar-chart-steps"></i> Residuals Analysis</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="residualsChart" class="chart-container"></div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Model Comparison Section -->
+            <section id="modelComparison" class="content-section d-none">
+                <div class="section-header">
+                    <h2><i class="bi bi-trophy"></i> Model Comparison</h2>
+                </div>
+                
+                <!-- Comparison Chart -->
+                <div class="card glass-card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-graph-up-arrow"></i> Model Performance Comparison</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="comparisonChart" class="chart-container"></div>
+                    </div>
+                </div>
+                
+                <!-- Performance Table -->
+                <div class="card glass-card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-table"></i> Performance Metrics</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table id="comparisonTable" class="table table-dark table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Model</th>
+                                        <th>RMSE</th>
+                                        <th>MAPE (%)</th>
+                                        <th>AIC</th>
+                                        <th>BIC</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Comparison data will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Welcome Section -->
+            <section id="welcomeSection" class="content-section">
+                <div class="welcome-container">
+                    <div class="welcome-content">
+                        <div class="welcome-icon">
+                            <i class="bi bi-graph-up-arrow"></i>
+                        </div>
+                        <h1 class="welcome-title">This Is ATSA Major Project for Forecssting </h1>
+                        <p class="welcome-subtitle">Advanced Time Series Forecasting Dashboard</p>
+                        <p class="welcome-description">
+                            Select a data source from the sidebar to get started with your time series analysis.
+                            Choose from stock data, CSV uploads, or sample datasets.
+                        </p>
+                        <div class="feature-grid">
+                            <div class="feature-item">
+                                <i class="bi bi-cpu"></i>
+                                <span>Multiple Models</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="bi bi-graph-up"></i>
+                                <span>Interactive Charts</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="bi bi-bar-chart"></i>
+                                <span>Performance Metrics</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="bi bi-trophy"></i>
+                                <span>Model Comparison</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+    
+    <!-- Floating Action Button -->
+    <div class="floating-actions">
+        <button id="scrollToTop" class="fab" title="Scroll to Top">
+            <i class="bi bi-arrow-up"></i>
+        </button>
+    </div>
+    
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JavaScript -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
