@@ -104,10 +104,7 @@ def api_load_csv_data():
         if file.filename == '':
             return jsonify({'error': 'No file selected'}), 400
         
-        # Read CSV file
-        df = pd.read_csv(file)
-        
-        # Process the CSV data using data_loader for consistency
+        # Process the CSV data using data_loader
         try:
             df = data_loader.load_csv_data(file)
             if df is None:

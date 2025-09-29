@@ -51,7 +51,7 @@ class DataLoader:
         Load time series data from uploaded CSV file.
         
         Args:
-            uploaded_file: Streamlit uploaded file object
+            uploaded_file: Flask uploaded file object
         
         Returns:
             pd.DataFrame: Time series data
@@ -59,6 +59,14 @@ class DataLoader:
         try:
             # Read CSV from uploaded file
             df = pd.read_csv(uploaded_file)
+            
+            # Check if DataFrame is empty
+            if df.empty:
+                raise ValueError("CSV file is empty")
+            
+            # Check if we have at least 2 columns (date and value)
+            if len(df.columns) < 2:
+                raise ValueError("CSV file must have at least 2 columns (date and value)")
             
             # Try to identify date column
             date_columns = ['date', 'Date', 'DATE', 'timestamp', 'Timestamp', 'time', 'Time']
@@ -72,25 +80,39 @@ class DataLoader:
             if date_col is None:
                 # If no date column found, assume first column is date
                 date_col = df.columns[0]
+                print(f"Warning: No standard date column found. Using '{date_col}' as date column.")
             
             # Convert date column to datetime
-            df[date_col] = pd.to_datetime(df[date_col])
+            try:
+                df[date_col] = pd.to_datetime(df[date_col])
+            except Exception as e:
+                raise ValueError(f"Could not parse date column '{date_col}': {str(e)}")
+            
             df.set_index(date_col, inplace=True)
             df.index.name = 'Date'
             
             # Select numeric columns only
             numeric_cols = df.select_dtypes(include=[np.number]).columns
+            
+            if len(numeric_cols) == 0:
+                raise ValueError("No numeric columns found in CSV file")
+            
             df = df[numeric_cols]
             
             # If multiple columns, use the first one
             if len(df.columns) > 1:
+                print(f"Warning: Multiple numeric columns found. Using '{df.columns[0]}' as value column.")
                 df = df.iloc[:, [0]]
+            
+            # Check if we have any data after processing
+            if df.empty:
+                raise ValueError("No valid data found after processing")
             
             return df
             
         except Exception as e:
             print(f"Error loading CSV data: {str(e)}")
-            return None
+            raise e  # Re-raise the exception with more context
     
     def load_sample_data(self):
         """
