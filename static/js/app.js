@@ -5,8 +5,13 @@ let charts = {};
 let particles = [];
 let animationFrameId = null;
 
+// ===== RUNTIME ENV DETECTION =====
+const isBrowser = typeof window !== 'undefined' && typeof document !== 'undefined';
+
 // ===== DOM ELEMENTS =====
-const elements = {
+let elements = {};
+if (isBrowser) {
+elements = {
     // Sidebar
     sidebar: document.getElementById('sidebar'),
     sidebarToggle: document.getElementById('sidebarToggle'),
@@ -84,6 +89,7 @@ const elements = {
     // Sidebar overlay
     sidebarOverlay: document.getElementById('sidebarOverlay')
 };
+}
 
 // ===== UTILITY FUNCTIONS =====
 function createScrollToTopButton() {
@@ -97,11 +103,13 @@ function createScrollToTopButton() {
 }
 
 // ===== INITIALIZATION =====
-document.addEventListener('DOMContentLoaded', function() {
-    initializeApp();
-    setupEventListeners();
-    setupAnimations();
-});
+if (isBrowser) {
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeApp();
+        setupEventListeners();
+        setupAnimations();
+    });
+}
 
 function initializeApp() {
     // Set initial theme

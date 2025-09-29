@@ -499,7 +499,6 @@ body::after {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    animation: neonPulse 3s ease-in-out infinite;
 }
 
 .feature-item {
